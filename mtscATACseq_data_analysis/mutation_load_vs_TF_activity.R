@@ -31,42 +31,41 @@ for (sample_id in 1:n_samples){
     r_obs <- cor(TF_zscore, Mutation_load, method = "spearman")
     
     # ==========================================
-    #  执行置换检验 (Permutation Test)
+    #  Permutation Test
     # ==========================================
-    num_permutations <- 10000 # 置换次数 (建议 >= 1000, 越大越精确但越慢)
-    r_null <- numeric(num_permutations) # 用于存储每次置换后的相关系数
+    num_permutations <- 10000 # Number of permutations (recommended >= 1000; larger values yield higher precision but increase computation time)
+    r_null <- numeric(num_permutations) # Used to store the correlation coefficients after each permutation
     
     
-    message("正在进行置换检验...")
+    message("Permutation testing is in progress...")
     
     
     for (j in 1:num_permutations) {
-      # 核心步骤：保持 TF 不变，随机打乱 Het 的顺序
-      # 这模拟了零假设 (H0): 两者之间没有关联
+      # This simulates the null hypothesis (H0): there is no association between the two.
       shuffled_het <- sample(Mutation_load) 
       
-      # 计算打乱后的相关系数
+      # Compute the correlation coefficient after shuffling
       r_null[j] <- cor(TF_zscore, shuffled_het, method = "spearman")
     }
     
     
     # ==========================================
-    #  计算 Z 分数和 P 值
+    #  Calculation of Z-scores and P-values
     # ==========================================
     
     
-    # 计算零分布的均值和标准差
+    # Compute the mean and standard deviation of the null distribution
     mean_null <- mean(r_null)
     sd_null <- sd(r_null)
     
     
-    # 计算 Z 分数: (观测值 - 零分布均值) / 零分布标准差
+    # Calculate the Z-score: (observed value - mean of the null distribution) / standard deviation of the null distribution
     z_score <- (r_obs - mean_null) / sd_null
     
     
-    # 计算经验性 P 值 (双尾检验)
-    # 方法：统计绝对值大于等于 |r_obs| 的置换结果比例
-    # 加 1 是为了避免 P 值为 0 (一种保守的估计方法)
+    # Calculate the empirical P-value (two-tailed test)
+    # Method: Compute the proportion of permutation results with absolute values greater than or equal to |r_obs|
+    # Adding 1 prevents the P-value from being zero, serving as a conservative estimation approach
     p_value <- (sum(abs(r_null) >= abs(r_obs)) + 1) / (num_permutations + 1)
     
     final_tf_names[i] <- current_tf_name
@@ -127,42 +126,40 @@ for (sample_id in 1:n_samples){
     r_obs <- cor(TF_zscore, Mutation_load, method = "spearman")
     
     # ==========================================
-    #  执行置换检验 (Permutation Test)
+    #  Permutation Test
     # ==========================================
-    num_permutations <- 10000 # 置换次数 (建议 >= 1000, 越大越精确但越慢)
-    r_null <- numeric(num_permutations) # 用于存储每次置换后的相关系数
+    num_permutations <- 10000 
+    r_null <- numeric(num_permutations)
     
     
-    message("正在进行置换检验...")
+    message("Permutation testing is in progress...")
     
     
     for (j in 1:num_permutations) {
-      # 核心步骤：保持 TF 不变，随机打乱 Het 的顺序
-      # 这模拟了零假设 (H0): 两者之间没有关联
+      
       shuffled_het <- sample(Mutation_load) 
       
-      # 计算打乱后的相关系数
+      
       r_null[j] <- cor(TF_zscore, shuffled_het, method = "spearman")
     }
     
     
     # ==========================================
-    #  计算 Z 分数和 P 值
+    #  Calculation of Z-scores and P-values
     # ==========================================
     
     
-    # 计算零分布的均值和标准差
+    
     mean_null <- mean(r_null)
     sd_null <- sd(r_null)
     
     
-    # 计算 Z 分数: (观测值 - 零分布均值) / 零分布标准差
+    # 
     z_score <- (r_obs - mean_null) / sd_null
     
     
-    # 计算经验性 P 值 (双尾检验)
-    # 方法：统计绝对值大于等于 |r_obs| 的置换结果比例
-    # 加 1 是为了避免 P 值为 0 (一种保守的估计方法)
+    # 
+    #
     p_value <- (sum(abs(r_null) >= abs(r_obs)) + 1) / (num_permutations + 1)
     
     final_tf_names[i] <- current_tf_name
@@ -188,17 +185,17 @@ print("HSC end")
 df <- read.csv("response-to-reviewer1/SubsetHSC_mutation_load_type_Bone-Marrow-100W-ND5-G12918A-3673-66-Female-TFactivity-Zcore-Pvalue.txt", sep = "\t")
 df <- df %>%
   mutate(Type = case_when(
-    # 条件 1
+    
     Z_Score >= 1.96 & P_Value <= 0.05 ~ "PositiveCorrelation",
-    # 条件 1
+   
     Z_Score <= -1.96 & P_Value <= 0.05 ~ "NegativeCorrelation",
-    # 默认情况: 如果样本不在上述列表中，赋值为 NA (或者你可以改为 "Other")
+   
     TRUE ~ "NoCorrelation"
   ))
 
 table(df$Type)
 
-## 火山图
+
 highlight_genes <- c("Eomes_768", "Arid3a_7", "Tcf3_31", "Klf10_810", "Tcf12_59", "Tcf4_88",
                      "Fos_104", "Fosl1_107", "Fosb_98", "Fosl2_113", 
                      "Jund_135", "Jun_126", "Junb_127",
